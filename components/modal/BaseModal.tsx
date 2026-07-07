@@ -1,4 +1,4 @@
-import { clsx, isIos, isWeb } from '@/lib/utils'
+import { clsx, isIos, isWatch, isWeb } from '@/lib/utils'
 import { ReactNode } from 'react'
 import { KeyboardAvoidingView, Modal, Pressable, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -25,7 +25,10 @@ export const BaseModal: React.FC<{
           <Pressable className="absolute inset-0 bg-zinc-300/50 dark:bg-gray-600/50" onPress={onClose} />
           <KeyboardAvoidingView
             behavior={isIos ? 'padding' : undefined}
-            className="bg-zinc-100 dark:bg-gray-950 absolute top-0 left-0 bottom-0 w-[30rem] max-w-[80vw] flex-1"
+            className={clsx(
+              'bg-zinc-100 dark:bg-gray-950 absolute top-0 left-0 bottom-0 flex-1',
+              isWatch ? 'w-full' : 'w-[30rem] max-w-[80vw]',
+            )}
           >
             {inner}
           </KeyboardAvoidingView>
@@ -39,7 +42,10 @@ export const BaseModal: React.FC<{
       <Pressable className="absolute inset-0 bg-zinc-300/50 dark:bg-gray-600/50" onPress={onClose} />
       <KeyboardAvoidingView
         behavior={isIos ? 'padding' : undefined}
-        className="bg-zinc-100 dark:bg-gray-950 absolute top-0 left-0 bottom-0 w-[30rem] max-w-[80vw] flex-1"
+        className={clsx(
+          'bg-zinc-100 dark:bg-gray-950 absolute top-0 left-0 bottom-0 flex-1',
+          isWatch ? 'w-full' : 'w-[30rem] max-w-[80vw]',
+        )}
       >
         {inner}
       </KeyboardAvoidingView>

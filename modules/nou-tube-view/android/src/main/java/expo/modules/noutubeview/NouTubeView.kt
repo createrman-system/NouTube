@@ -16,6 +16,8 @@ import android.provider.Settings
 import android.util.AttributeSet
 import android.view.ContextMenu
 import android.view.MenuItem
+import android.view.InputDevice
+import android.view.ViewConfiguration
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.OrientationEventListener
@@ -60,14 +62,32 @@ class NouWebView @JvmOverloads constructor(context: Context, attrs: AttributeSet
     super.onWindowVisibilityChanged(VISIBLE)
   }
 
+  override fun onGenericMotionEvent(event: MotionEvent): Boolean {
+    if (event.action == MotionEvent.ACTION_SCROLL && event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)) {
+      val delta = -event.getAxisValue(MotionEvent.AXIS_SCROLL) *
+              ViewConfiguration.get(context).scaledVerticalScrollFactor
+      scrollBy(0, delta.toInt())
+      return true
+    }
+    return super.onGenericMotionEvent(event)
+  }
+
   init {
     settings.run {
       javaScriptEnabled = true
       domStorageEnabled = true
+      databaseEnabled = true
       mediaPlaybackRequiresUserGesture = false
-      supportZoom()
+      setSupportZoom(true)
       builtInZoomControls = true
       displayZoomControls = false
+      
+      // Performance optimizations for Exynos W1000
+      allowFileAccess = true
+      allowContentAccess = true
+      loadWithOverviewMode = true
+      useWideViewPort = true
+      setCacheMode(android.webkit.WebSettings.LOAD_DEFAULT)
     }
     CookieManager.getInstance().setAcceptCookie(true)
 
@@ -306,6 +326,16 @@ class NouTubeView(context: Context, appContext: AppContext) : ExpoView(context, 
         }
       }
     }
+
+  override fun onGenericMotionEvent(event: MotionEvent): Boolean {
+    if (event.action == MotionEvent.ACTION_SCROLL && event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)) {
+      val delta = -event.getAxisValue(MotionEvent.AXIS_SCROLL) *
+              ViewConfiguration.get(context).scaledVerticalScrollFactor
+      scrollBy(0, delta.toInt())
+      return true
+    }
+    return super.onGenericMotionEvent(event)
+  }
 
   init {
     swipeRefreshLayout.addView(webView)

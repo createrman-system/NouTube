@@ -11,7 +11,7 @@ import NouTubeViewModule, { NouTubeView } from '@/modules/nou-tube-view'
 import { StyleSheet, View, useWindowDimensions } from 'react-native'
 import { getVideoId, setPageUrl } from '@/lib/page'
 import { showToast } from '@/lib/toast'
-import { clsx, isAndroid, isWeb, nIf } from '@/lib/utils'
+import { clsx, isAndroid, isWeb, isWatch, nIf } from '@/lib/utils'
 import type { WebviewTag } from 'electron'
 import { NouHeader } from '../header/NouHeader'
 import { WebviewContainer } from './webview-container'
@@ -338,7 +338,8 @@ export const MainPageContent: React.FC<{ contentJs: string }> = ({ contentJs }) 
     `window.NouTubeInitialSettings = ${JSON.stringify(contentSettings)};` +
     `window.NouTubePreferH264 = ${preferH264 ? 'true' : 'false'};` +
     `window.NouTubeClickbaitThumbnail = ${JSON.stringify(clickbaitThumbnail)};` +
-    `window.NouTubeBlocklist = ${JSON.stringify(getBlocklistSnapshot(blocklistState))};`
+    `window.NouTubeBlocklist = ${JSON.stringify(getBlocklistSnapshot(blocklistState))};` +
+    `window.isWatch = ${isWatch ? 'true' : 'false'};`
   const { userId, me } = useMe()
   const userAgent = resolveUserAgent(
     isWeb ? window.electron.process.platform : 'android',
@@ -641,6 +642,7 @@ export const MainPageContent: React.FC<{ contentJs: string }> = ({ contentJs }) 
       <View
         className={clsx(
           'flex-1 h-full overflow-hidden',
+          isWatch ? 'bg-black' : '',
           isWeb && 'lg:flex-row',
           headerPosition === 'bottom' && 'flex-col-reverse',
         )}
@@ -671,8 +673,8 @@ export const MainPageContent: React.FC<{ contentJs: string }> = ({ contentJs }) 
               }}
               useragent={userAgent}
               pullToRefreshEnabled={pullToRefreshEnabled}
-              textZoom={defaultZoom}
-              scriptOnStart={`window.isAndroid = true;\n${preludeJs}\n${contentJs}`}
+              textZoom={isWatch ? Math.max(defaultZoom, 130) : defaultZoom}
+              scriptOnStart={`window.isAndroid = true;\nwindow.isWatch = ${isWatch ? 'true' : 'false'};\n${preludeJs}\n${contentJs}`}
               onLoad={onLoad}
               onMessage={onNativeMessage}
             />

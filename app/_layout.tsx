@@ -10,6 +10,8 @@ import { Slot } from 'expo-router'
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useEffect } from 'react'
 
+import { clsx, isWatch } from '@/lib/utils'
+
 function RootLayoutContent() {
   useObserveEffect(settings$.theme, ({ value }) => {
     const nextColorScheme = value === 'dark' || value === 'light' ? value : Appearance.getColorScheme() === 'light' ? 'light' : 'dark'
@@ -26,13 +28,14 @@ function RootLayoutContent() {
   const insets = useSafeAreaInsets()
   const colorScheme = useColorScheme()
   const isDark = colorScheme !== 'light'
+  const bgColor = isWatch ? 'bg-black' : isDark ? 'bg-zinc-800' : 'bg-zinc-100'
 
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <View className={isDark ? 'bg-zinc-800' : 'bg-zinc-100'} style={{ height: insets.top, zIndex: 10 }} />
+      <View className={bgColor} style={{ height: insets.top, zIndex: 10 }} />
       <Slot />
-      <View className={isDark ? 'bg-zinc-800' : 'bg-zinc-100'} style={{ height: insets.bottom }} />
+      <View className={bgColor} style={{ height: insets.bottom }} />
     </>
   )
 }

@@ -4,7 +4,7 @@ import { NouLink } from '../link/NouLink'
 import { version } from '../../package.json'
 import { version as desktopVersion } from '../../desktop/package.json'
 import { useCallback, useEffect, useState } from 'react'
-import { clsx, isWeb } from '@/lib/utils'
+import { clsx, isWatch, isWeb } from '@/lib/utils'
 import { useValue } from '@legendapp/state/react'
 import { BaseModal } from './BaseModal'
 import { ui$ } from '@/states/ui'
@@ -302,6 +302,42 @@ export const SettingsModal = () => {
 
   const renderPage = () => {
     if (currentPage === 'home') {
+      if (isWatch) {
+        return (
+          <View className="gap-6">
+            <SettingsSection label={t('settings.general')}>
+              <View className={surfaceCls}>
+                <SettingsNavRow
+                  title={t('settings.preferences')}
+                  description={t('settings.preferencesHint')}
+                  icon="toggle-on"
+                  onPress={() => pushPage('preferences')}
+                />
+                <SettingsNavRow
+                  title={t('settings.appearance')}
+                  description={t('settings.appearanceHint')}
+                  icon="palette"
+                  meta={themeLabel}
+                  onPress={() => pushPage('appearance')}
+                  isLast
+                />
+              </View>
+            </SettingsSection>
+            <SettingsSection label={t('about.label')}>
+              <View className={surfaceCls}>
+                <SettingsNavRow
+                  title={t('about.label')}
+                  description={t('about.hint')}
+                  icon="info-outline"
+                  meta={`v${appVersion}`}
+                  onPress={() => pushPage('about')}
+                  isLast
+                />
+              </View>
+            </SettingsSection>
+          </View>
+        )
+      }
       return (
         <View className="gap-8">
           <SettingsSection label={t('settings.general')}>
@@ -474,7 +510,7 @@ export const SettingsModal = () => {
 
   const content = (
     <View className="flex-1 bg-zinc-100 dark:bg-zinc-950">
-      <View className="border-b border-zinc-300 dark:border-zinc-800 px-3 py-3">
+      <View className={clsx('border-b border-zinc-300 dark:border-zinc-800 px-3 py-3', isWatch && 'pt-10 px-6')}>
         <View className="flex-row items-center gap-2">
           <Pressable
             onPress={handleBack}
@@ -489,9 +525,9 @@ export const SettingsModal = () => {
       </View>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <View className="px-4 py-5">
+        <View className={clsx('px-4 py-5', isWatch && 'px-6')}>
           {renderPage()}
-          <View className="h-16" />
+          <View className="h-24" />
         </View>
       </ScrollView>
     </View>

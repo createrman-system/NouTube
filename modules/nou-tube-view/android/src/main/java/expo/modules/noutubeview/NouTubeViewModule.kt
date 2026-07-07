@@ -25,40 +25,45 @@ class NouTubeViewModule : Module() {
   }
 
   private fun applyProxy(settings: NouSettings) {
-    if (!WebViewFeature.isFeatureSupported(WebViewFeature.PROXY_OVERRIDE)) {
-      nouController.log("proxy override is not supported")
-      return
-    }
-
-    val proxyKey = "${settings.proxyEnabled}|${settings.proxyType}|${settings.proxyHost}|${settings.proxyPort}"
-    if (proxyKey == lastProxyKey) {
-      return
-    }
-    lastProxyKey = proxyKey
-
-    val executor = java.util.concurrent.Executor { command -> command.run() }
-    if (settings.proxyEnabled && settings.proxyHost.isNotBlank()) {
-      val type = if (settings.proxyType == "socks") "socks" else "http"
-      val portStr = if (settings.proxyPort.isNotBlank()) ":${settings.proxyPort}" else ""
-      val proxyRule = "$type://${settings.proxyHost}$portStr"
-      val proxyConfig = ProxyConfig.Builder()
-        .addProxyRule(proxyRule)
-        .build()
-      try {
-        ProxyController.getInstance().setProxyOverride(proxyConfig, executor, Runnable {
-          nouController.log("proxy override applied: $proxyRule")
-        })
-      } catch (e: Exception) {
-        nouController.log("setProxyOverride failed: ${e.message}")
+    Log.d("NouTubeView", "applyProxy started")
+    try {
+      if (!WebViewFeature.isFeatureSupported(WebViewFeature.PROXY_OVERRIDE)) {
+        nouController.log("proxy override is not supported")
+        return
       }
-    } else {
-      try {
-        ProxyController.getInstance().clearProxyOverride(executor, Runnable {
-          nouController.log("proxy override cleared")
-        })
-      } catch (e: Exception) {
-        nouController.log("clearProxyOverride failed: ${e.message}")
+
+      val proxyKey = "${settings.proxyEnabled}|${settings.proxyType}|${settings.proxyHost}|${settings.proxyPort}"
+      if (proxyKey == lastProxyKey) {
+        return
       }
+      lastProxyKey = proxyKey
+
+      val executor = java.util.concurrent.Executor { command -> command.run() }
+      if (settings.proxyEnabled && settings.proxyHost.isNotBlank()) {
+        val type = if (settings.proxyType == "socks") "socks" else "http"
+        val portStr = if (settings.proxyPort.isNotBlank()) ":${settings.proxyPort}" else ""
+        val proxyRule = "$type://${settings.proxyHost}$portStr"
+        val proxyConfig = ProxyConfig.Builder()
+          .addProxyRule(proxyRule)
+          .build()
+        try {
+          ProxyController.getInstance().setProxyOverride(proxyConfig, executor, Runnable {
+            nouController.log("proxy override applied: $proxyRule")
+          })
+        } catch (e: Exception) {
+          nouController.log("setProxyOverride failed: ${e.message}")
+        }
+      } else {
+        try {
+          ProxyController.getInstance().clearProxyOverride(executor, Runnable {
+            nouController.log("proxy override cleared")
+          })
+        } catch (e: Exception) {
+          nouController.log("clearProxyOverride failed: ${e.message}")
+        }
+      }
+    } catch (e: Throwable) {
+      Log.e("NouTubeView", "applyProxy critical failure", e)
     }
   }
 
@@ -77,12 +82,13 @@ class NouTubeViewModule : Module() {
     Events("log", "sleepTimer", "downloadProgress")
 
     OnCreate {
+      Log.d("NouTubeView", "Module OnCreate started")
       try {
         ytDlp().ensureInitialized()
+        Log.d("NouTubeView", "YoutubeDL initialized successfully")
         sendEvent("log", mapOf("msg" to "YoutubeDL initialized successfully"))
       } catch (e: Exception) {
-        // Log it, but the actual error will be thrown in the AsyncFunctions
-        Log.e("NouTubeView", "YoutubeDL initialization in OnCreate failed", e)
+        Log.e("NouTubeView", "YoutubeDL initialization failed: ${e.message}", e)
         sendEvent("log", mapOf("msg" to "YoutubeDL initialization failed: ${e.message}"))
       }
     }
@@ -102,7 +108,11 @@ class NouTubeViewModule : Module() {
     }
 
     Function("setSettings") { settings: NouSettings ->
-      applyProxy(settings)
+      try {
+        applyProxy(settings)
+      } catch (e: Throwable) {
+        Log.e("NouTubeView", "setSettings failed", e)
+      }
     }
 
     Function("setLocaleStrings") { v: JavaScriptObject ->

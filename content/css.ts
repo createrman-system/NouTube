@@ -114,7 +114,44 @@ const cssContent = css`
   }
 `
 
-export const getCoreCss = () => cssContent + (window.NouTubeI ? cssContentMobile : '')
+const cssContentWatch = css`
+  /* Pure Black for AMOLED */
+  body, #player, #player-container, .ytd-app, ytm-app {
+    background-color: black !important;
+  }
+
+  /* High contrast text for 3000 nits peak display */
+  * {
+    color: #ffffff !important;
+    text-shadow: 0 0 1px rgba(0,0,0,0.5);
+  }
+
+  /* Circular screen adjustments */
+  body {
+    padding-top: 15% !important;
+    padding-bottom: 25% !important;
+    padding-left: 10% !important;
+    padding-right: 10% !important;
+  }
+
+  /* Hide distracting elements on small screen */
+  #action-bar, .ytm-pivot-bar-renderer, #masthead-container {
+     /* Keep essentials but minimize */
+  }
+
+  ytm-masthead {
+    padding-top: 20px !important;
+  }
+
+  /* Make sure video takes full width */
+  .video-container {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+`
+
+export const getCoreCss = () =>
+  cssContent + (window.NouTubeI ? cssContentMobile : '') + (window.isWatch ? cssContentWatch : '')
 
 export const getInjectedCss = (userStyles?: any) => {
   return [getCoreCss(), getEnabledUserStyleCss(document.location.host, userStyles)].filter(Boolean).join('\n\n')

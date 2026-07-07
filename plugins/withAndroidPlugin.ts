@@ -6,7 +6,23 @@ const withAndroidSigningConfig: ConfigPlugin = (config) => {
     const app = config.modResults.manifest.application?.[0]
     if (app) {
       app.$['android:extractNativeLibs'] = 'true'
+      app.$['android:hardwareAccelerated'] = 'true'
+      app.$['android:largeHeap'] = 'true'
     }
+
+    if (!config.modResults.manifest['uses-feature']) {
+      config.modResults.manifest['uses-feature'] = []
+    }
+    // Add Wear OS feature support
+    config.modResults.manifest['uses-feature'].push({
+      $: {
+        'android:name': 'android.hardware.type.watch',
+        'android:required': 'false',
+      },
+    })
+
+    // Galaxy Watch 8 optimization: Ensure it knows about the screen shape if possible
+    // (Though Wear OS handles this mostly, some hints help)
     return config
   })
 
@@ -39,8 +55,9 @@ android {`,
       .replace('zh-Hant', 'b+zh+Hant')
       .replace('pt-BR', 'b+pt+BR')
       .replace(
-        /buildTypes \{([\s\S]*?)release \{([\s\S]*?)signingConfig signingConfigs\.debug/,
-        `buildTypes {$1release { `,
+        /buildTypes \{([\s\S]*?)release \{/,
+        `buildTypes {$1release {
+            signingConfig signingConfigs.debug`,
       )
       .replace(
         /androidResources \{([\s\S]*?)}/,
@@ -49,12 +66,23 @@ android {`,
         includeInApk = false
         includeInBundle = false
     }
+    packagingOptions {
+        pickFirst 'lib/**/libc++_shared.so'
+        pickFirst 'lib/**/libfbjni.so'
+        pickFirst 'lib/**/libjscexecutor.so'
+        pickFirst 'lib/**/libhermes.so'
+        pickFirst 'lib/**/libnative-filters.so'
+
+        // Stability for Galaxy Watch 8 (Wear OS)
+        doNotStrip "*/arm64-v8a/*.so"
+        doNotStrip "*/armeabi-v7a/*.so"
+    }
     splits {
         abi {
             reset()
             enable true
-            universalApk false
-            include project.ext.abiCodes.keySet() as String[]
+            universalApk true
+            include 'arm64-v8a', 'armeabi-v7a'
         }
     }
     android.applicationVariants.configureEach { variant ->

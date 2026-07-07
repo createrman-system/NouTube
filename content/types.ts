@@ -10,6 +10,7 @@ declare global {
   interface Window {
     _lact: number
     isAndroid: boolean
+    isWatch: boolean
     NouTubeInitialSettings?: Record<string, unknown>
     NouTubeBlocklist?: import('../lib/blocklist').BlocklistSnapshot
     NouTubeI: NouTubeI

@@ -4,7 +4,7 @@ import { settings$ } from '@/states/settings'
 import { colors } from '@/lib/colors'
 import { NouMenu } from '../menu/NouMenu'
 import { TabContextMenu } from '../menu/TabContextMenu'
-import { clsx, isAndroid, isIos, isWeb, nIf } from '@/lib/utils'
+import { clsx, isAndroid, isIos, isWatch, isWeb, nIf } from '@/lib/utils'
 import { ui$, updateUrl } from '@/states/ui'
 import { bookmarks$ } from '@/states/bookmarks'
 import { getPageType } from '@/lib/page'
@@ -221,6 +221,42 @@ export const NouHeader: React.FC<{ getNoutube: () => any }> = ({ getNoutube }) =
     } catch (error) {
       console.error('[NouTube user script execute] ' + script.name, error)
     }
+  }
+
+  if (isWatch) {
+    return (
+      <Root
+        style={animatedStyle}
+        onLayout={(e) => ui$.headerHeight.set(e.nativeEvent.layout.height)}
+        className={clsx(
+          'bg-black/90 flex-row justify-center px-4 py-2',
+          hideableHeader && 'absolute left-0 right-0 z-10 top-0',
+        )}
+      >
+        <MaterialButton
+          size={24}
+          name={isYTMusic ? 'library-music' : 'video-library'}
+          onPress={() => ui$.libraryModalOpen.set(true)}
+        />
+        <MaterialButton size={24} name="home" onPress={onOpenHome} />
+        <MaterialButton size={24} name="refresh" onPress={reloadPage} />
+        <NouMenu
+          trigger={<MaterialButton size={24} name="more-vert" />}
+          items={[
+            {
+              label: isYTMusic ? 'YouTube' : 'YouTube Music',
+              icon: <MaterialIcons name={isYTMusic ? 'video-library' : 'library-music'} size={20} color={headerControlColor} />,
+              handler: onToggleHome,
+            },
+            {
+              label: t('settings.label'),
+              icon: <MaterialIcons name="settings" size={20} color={headerControlColor} />,
+              handler: () => ui$.settingsModalOpen.set(true),
+            },
+          ]}
+        />
+      </Root>
+    )
   }
 
   return (

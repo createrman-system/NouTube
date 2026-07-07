@@ -83,7 +83,11 @@ class NouService : Service() {
     filter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
     filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
     val noisyReceiver = NoisyAudioReceiver(view)
-    _activity.registerReceiver(noisyReceiver, filter)
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+      _activity.registerReceiver(noisyReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+    } else {
+      _activity.registerReceiver(noisyReceiver, filter)
+    }
   }
 
   fun setSleepTimerDeadline(deadlineMs: Long) {
