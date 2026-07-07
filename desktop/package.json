@@ -41,7 +41,6 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
-    "noutube": "link:noutube",
     "react-hot-toast": "^2.5.2",
     "vite": "^7.0.6",
     "vite-plugin-react-native-web": "^2.2.1"
